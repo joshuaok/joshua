@@ -4,10 +4,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.RobotMap;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -59,10 +63,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {}
-
+private double startTime;
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    Timer.getFPGATimestamp();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -70,10 +75,33 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.schedule();
     }
   }
-
+  public static final int Left_front_drive_port=3;
+  public static final int Right_front_drive_port=4;
+  public static final int Left_back_drive_port=1;
+  public static final int Right_back_drive_port=2;
+  public static WPI_TalonFX leftFrontDrivePort= new WPI_TalonFX(Left_front_drive_port);
+  public static WPI_TalonFX rightFrontDrivePort= new WPI_TalonFX(Right_front_drive_port);
+  public static WPI_TalonFX leftBackDrivePort= new WPI_TalonFX(Left_back_drive_port);
+  public static WPI_TalonFX rightBackDrivePort= new WPI_TalonFX(Right_back_drive_port);
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+double time = Timer.getFPGATimestamp();
+if (time<1){
+  leftFrontDrivePort.set(0.1);
+  rightFrontDrivePort.set(0.1);
+  leftBackDrivePort.set(0.1);
+  rightBackDrivePort.set(0.1);
+}
+else {
+  leftFrontDrivePort.set(0);
+  rightFrontDrivePort.set(0);
+  leftBackDrivePort.set(0);
+  rightBackDrivePort.set(0);
+}
+
+
+  }
 
   @Override
   public void teleopInit() {
