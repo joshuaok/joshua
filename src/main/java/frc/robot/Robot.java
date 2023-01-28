@@ -95,12 +95,7 @@ private double startTime;
   @Override
   public void autonomousPeriodic() {
     double time = Timer.getFPGATimestamp();
-    if (time<5){
       setpoint = 2;
-    }
-    else {
-      setpoint = 0;
-    }
 
     //sensor pos
     double sensorPosition = encoder.get()* kDriveTick2Meter;
