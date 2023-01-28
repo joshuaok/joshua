@@ -80,12 +80,21 @@ private double startTime;
   private final double kDriveTick2Meter = 1.0 / Math.PI*5 *2048;
 
   final double kP = 0.5;
+  final double kI=0.1;
+  final double kD = 0.01;
   
   double setpoint=0;
+double errorSum=0;
+double lastTimestamp = 0;
+double lastError = 0;
+
+
   @Override
   public void autonomousInit() {
     encoder.reset();
-    Timer.getFPGATimestamp();
+    errorSum=0;
+    lastError =0;
+    lastTimestamp=Timer.getFPGATimestamp();
   }
 
 
@@ -94,21 +103,27 @@ private double startTime;
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    double time = Timer.getFPGATimestamp();
       setpoint = 2;
 
     //sensor pos
     double sensorPosition = encoder.get()* kDriveTick2Meter;
 
     double error = setpoint - sensorPosition;
+    double dt = Timer.getFPGATimestamp() - lastTimestamp;
 
-    double outputSpeed = kP * error;
+    error += error*dt ;
+
+    double outputSpeed = kP * error + kI * errorSum + kD *errorRate;
+
+    double errorRate = (error = lastError) / dt;
 
 leftFrontmotor.set(-outputSpeed);
 leftBackmotor.set(-outputSpeed);
 rightFrontmotor.set(outputSpeed);
 rightBackmotor.set(outputSpeed);
 
+lastTimestamp = Timer.getFPGATimestamp();
+lastError = error;
   }
 
   @Override
