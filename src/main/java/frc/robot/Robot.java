@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
@@ -74,6 +75,7 @@ private double startTime;
   public static WPI_TalonFX leftBackmotor= new WPI_TalonFX(1);
   public static WPI_TalonFX rightBackmotor= new WPI_TalonFX(2);
 
+  private Joystick joy1 = new Joystick(0);
 
   private Encoder encoder = new Encoder(0, 1, false, EncodingType.k4X);
   
@@ -103,8 +105,13 @@ double lastError = 0;
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      setpoint = 2;
-
+   
+    if (joy1.getRawButton(1)) {
+      setpoint = 10;
+    } else if (joy1.getRawButton(2)) {
+      setpoint = 0;
+    }
+    
     //sensor pos
     double sensorPosition = encoder.get()* kDriveTick2Meter;
 
