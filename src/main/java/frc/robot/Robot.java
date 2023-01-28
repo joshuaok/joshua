@@ -113,9 +113,11 @@ double lastError = 0;
 
     error += error*dt ;
 
+    double errorRate = (error = lastError) / dt;
+
+
     double outputSpeed = kP * error + kI * errorSum + kD *errorRate;
 
-    double errorRate = (error = lastError) / dt;
 
 leftFrontmotor.set(-outputSpeed);
 leftBackmotor.set(-outputSpeed);
