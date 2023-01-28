@@ -5,9 +5,11 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import frc.robot.Constants.DriveConstants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -17,15 +19,19 @@ public class DriveSubsystem extends SubsystemBase {
   private static final WPI_TalonFX leftBackMotor= RobotMap.leftBackDrivePort;
   private static final WPI_TalonFX rightBackMotor= RobotMap.rightBackDrivePort;
 
-  private static final double In_To_M=.0254;
-  private static final int Motor_Encoder_Codes_Per_Rev=2048;
-  private static final double Diameter_Inches=5.0;
-  private static final double Wheel_Diameter= Diameter_Inches * In_To_M;
-  private static final double Wheel_Circumference= Wheel_Diameter * Math.PI;
-  private static final double Gear_Ratio=12.75;
-  private static final double Ticks_Per_Meter= ( Motor_Encoder_Codes_Per_Rev * Gear_Ratio)/(Wheel_Circumference);
-  private static final double Meters_Per_Ticks= 1/Ticks_Per_Meter;
-  /** Creates a new DriveSubsystem. */
+
+
+
+
+  public double left_speed_cmd;
+  public double right_speed_cmd;
+
+  public double left_speed_feedback;
+  public double right_speed_feedback;
+  private double Meters_Per_Ticks;
+
+
+  
   public void setModePercentVoltage(){
     leftFrontMotor.set(ControlMode.PercentOutput, 0);
     rightFrontMotor.set(ControlMode.PercentOutput, 0);
@@ -118,6 +124,34 @@ public class DriveSubsystem extends SubsystemBase {
     drive(0,0);
   }
 
+
+  public void straightDrive(double leftSpeed, double rightSpeed) {
+
+   
+    left_speed_feedback = getBackLeftEncoderVelocityMetersPerSecond();
+    right_speed_feedback = getBackRightEncoderVelocityMetersPerSecond(); 
+
+    left_speed_cmd = leftSpeed; // m/s
+    right_speed_cmd = rightSpeed; // m/s
+
+    double driveSpeedPer100MS = (DriveConstants.Ticks_Per_Meter * (1.0/1000.0) * 100.0); 
+
+    leftBackMotor.set(TalonFXControlMode.Velocity, driveSpeedPer100MS*left_speed_cmd); 
+    rightBackMotor.set(TalonFXControlMode.Velocity, driveSpeedPer100MS*right_speed_cmd);
+
+  }
+
+  public double getBackLeftEncoderVelocityMetersPerSecond() {
+    double backLeftVelocityMPS = (leftBackMotor.getSelectedSensorVelocity() * 10);
+    backLeftVelocityMPS = backLeftVelocityMPS * DriveConstants.Meters_Per_Ticks;
+    return (backLeftVelocityMPS);
+  }
+
+  public double getBackRightEncoderVelocityMetersPerSecond() {
+    double backRightVelocityMPS = (rightBackMotor.getSelectedSensorVelocity() * 10); // /10
+    backRightVelocityMPS = backRightVelocityMPS * DriveConstants.Meters_Per_Ticks;
+    return (backRightVelocityMPS);
+  }
   
   @Override
   public void periodic() {

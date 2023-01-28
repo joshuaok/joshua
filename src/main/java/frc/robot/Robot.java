@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -41,9 +40,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     //m_robotContainer.driveSubsystem.setModePercentVoltage();
-    RobotContainer.driveSubsystem.resetEncoders();
   
-
   }
 
   /**
@@ -61,7 +58,6 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    SmartDashboard.putNumber("encoder value", encoder.get() * kDriveTick2Meter);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -70,39 +66,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {}
-private double startTime;
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
 
-  public static WPI_TalonFX leftFrontmotor= new WPI_TalonFX(3);
-  public static WPI_TalonFX rightFrontmotor= new WPI_TalonFX(4);
-  public static WPI_TalonFX leftBackmotor= new WPI_TalonFX(1);
-  public static WPI_TalonFX rightBackmotor= new WPI_TalonFX(2);
 
-
-  private Encoder encoder = new Encoder(0, 1, false, EncodingType.k4X);
-  
-  private final double kDriveTick2Meter = 1.0 / Math.PI*5 *2048;
-
-
-  
 
   @Override
   public void autonomousInit() {
-    encoder.reset();
-    errorSum=0;
-    lastError =0;
-    lastTimestamp=Timer.getFPGATimestamp();
+
   }
-
-
-  final double kP = 0.5;
-  final double kI=0.1;
-  final double kD = 0.01;
-
-double setpoint=0;
-double errorSum=0;
-double lastTimestamp = 0;
-double lastError = 0;
 
 
 
@@ -110,29 +81,7 @@ double lastError = 0;
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-   
-setpoint = 2;
-    
-    //sensor pos
-    double sensorPosition = encoder.get()* kDriveTick2Meter;
 
-    double error = setpoint - sensorPosition;
-    double dt = Timer.getFPGATimestamp() - lastTimestamp;
-
-
-    double errorRate = (error = lastError) / dt;
-
-
-    double outputSpeed = kP * error + kI * errorSum + kD *errorRate;
-
-
-leftFrontmotor.set(-outputSpeed);
-leftBackmotor.set(-outputSpeed);
-rightFrontmotor.set(outputSpeed);
-rightBackmotor.set(outputSpeed);
-
-lastTimestamp = Timer.getFPGATimestamp();
-lastError = error;
   }
 
   @Override
