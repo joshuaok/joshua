@@ -7,9 +7,11 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystem;
@@ -58,6 +60,8 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    SmartDashboard.putNumber("encoder value", encoder.get() * kDriveTick2Meter);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -79,15 +83,8 @@ private double startTime;
   
   private final double kDriveTick2Meter = 1.0 / Math.PI*5 *2048;
 
-  final double kP = 0.5;
-  final double kI=0.1;
-  final double kD = 0.01;
-  
-  double setpoint=0;
-double errorSum=0;
-double lastTimestamp = 0;
-double lastError = 0;
 
+  
 
   @Override
   public void autonomousInit() {
@@ -98,24 +95,36 @@ double lastError = 0;
   }
 
 
+  final double kP = 0.5;
+  final double kI=0.1;
+  final double kD = 0.01;
+
+double setpoint=0;
+double errorSum=0;
+double lastTimestamp = 0;
+double lastError = 0;
+
+
 
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-      setpoint = 2;
-
+   
+setpoint = 2;
+    
     //sensor pos
     double sensorPosition = encoder.get()* kDriveTick2Meter;
 
     double error = setpoint - sensorPosition;
     double dt = Timer.getFPGATimestamp() - lastTimestamp;
 
-    error += error*dt ;
+
+    double errorRate = (error = lastError) / dt;
+
 
     double outputSpeed = kP * error + kI * errorSum + kD *errorRate;
 
-    double errorRate = (error = lastError) / dt;
 
 leftFrontmotor.set(-outputSpeed);
 leftBackmotor.set(-outputSpeed);
