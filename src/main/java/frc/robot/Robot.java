@@ -6,12 +6,15 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.RobotMap;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -65,41 +68,51 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {}
 private double startTime;
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+
+  public static WPI_TalonFX leftFrontmotor= new WPI_TalonFX(3);
+  public static WPI_TalonFX rightFrontmotor= new WPI_TalonFX(4);
+  public static WPI_TalonFX leftBackmotor= new WPI_TalonFX(1);
+  public static WPI_TalonFX rightBackmotor= new WPI_TalonFX(2);
+
+
+  private Encoder encoder = new Encoder(0, 1, false, EncodingType.k4X);
+  
+  private final double kDriveTick2Meter = 1.0 / Math.PI*5 *2048;
+
+  final double kP = 0.5;
+  
+  double setpoint=0;
   @Override
   public void autonomousInit() {
+    encoder.reset();
     Timer.getFPGATimestamp();
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
   }
-  public static final int Left_front_drive_port=3;
-  public static final int Right_front_drive_port=4;
-  public static final int Left_back_drive_port=1;
-  public static final int Right_back_drive_port=2;
-  public static WPI_TalonFX leftFrontDrivePort= new WPI_TalonFX(Left_front_drive_port);
-  public static WPI_TalonFX rightFrontDrivePort= new WPI_TalonFX(Right_front_drive_port);
-  public static WPI_TalonFX leftBackDrivePort= new WPI_TalonFX(Left_back_drive_port);
-  public static WPI_TalonFX rightBackDrivePort= new WPI_TalonFX(Right_back_drive_port);
+
+
+
+
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-double time = Timer.getFPGATimestamp();
-if (time<1){
-  leftFrontDrivePort.set(0.1);
-  rightFrontDrivePort.set(0.1);
-  leftBackDrivePort.set(0.1);
-  rightBackDrivePort.set(0.1);
-}
-else {
-  leftFrontDrivePort.set(0);
-  rightFrontDrivePort.set(0);
-  leftBackDrivePort.set(0);
-  rightBackDrivePort.set(0);
-}
+    double time = Timer.getFPGATimestamp();
+    if (time<5){
+      setpoint = 2;
+    }
+    else {
+      setpoint = 0;
+    }
 
+    //sensor pos
+    double sensorPosition = encoder.get()* kDriveTick2Meter;
+
+    double error = setpoint - sensorPosition;
+
+    double outputSpeed = kP * error;
+
+leftFrontmotor.set(-outputSpeed);
+leftBackmotor.set(-outputSpeed);
+rightFrontmotor.set(outputSpeed);
+rightBackmotor.set(outputSpeed);
 
   }
 
